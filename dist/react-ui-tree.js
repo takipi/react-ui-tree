@@ -179,7 +179,7 @@ var _initialiseProps = function _initialiseProps() {
 
     var tempCollapsed = void 0;
 
-    if (index === null) {
+    if (index == null) {
       tempCollapsed = false;
       noIndex = true;
     } else {
