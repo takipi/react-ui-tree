@@ -174,8 +174,19 @@ var _initialiseProps = function _initialiseProps() {
     var paddingLeft = _this2.props.paddingLeft;
     var newIndex = null;
     var index = tree.getIndex(dragging.id);
-    var collapsed = index.node.collapsed;
 
+    var noIndex = false;
+
+    var tempCollapsed = void 0;
+
+    if (index === null) {
+      tempCollapsed = false;
+      noIndex = true;
+    } else {
+      tempCollapsed = index.node.collapsed;
+    }
+
+    var collapsed = tempCollapsed;
     var _startX = _this2._startX;
     var _startY = _this2._startY;
     var _offsetX = _this2._offsetX;
@@ -183,7 +194,7 @@ var _initialiseProps = function _initialiseProps() {
 
     var pos = {
       x: _startX + (_this2.props.disableHorizontalDrag ? 0 : e.clientX - _offsetX),
-      y: _startY + e.clientY - _offsetY
+      y: _startY + (noIndex ? 0 : e.clientY - _offsetY)
     };
     dragging.x = pos.x;
     dragging.y = pos.y;
