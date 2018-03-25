@@ -199,6 +199,10 @@ var _initialiseProps = function _initialiseProps() {
     dragging.x = pos.x;
     dragging.y = pos.y;
 
+    if (noIndex) {
+      return;
+    }
+
     var diffX = dragging.x - paddingLeft / 2 - (index.left - 2) * paddingLeft;
     var diffY = dragging.y - dragging.h / 2 - (index.top - 2) * dragging.h;
 
