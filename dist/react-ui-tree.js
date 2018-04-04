@@ -139,6 +139,9 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.dragStart = function (id, dom, e) {
+    if (_this2.props.disableDragging) {
+      return;
+    }
     if (_this2.props.disableRootDrag && id == 1) {
       return;
     }
