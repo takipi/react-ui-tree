@@ -92,10 +92,17 @@ var UITreeNode = function (_Component) {
     }, _this.handleMouseDown = function (e) {
       var nodeId = _this.props.index.id;
       var dom = _this.refs.inner;
+      var eventXY = { clientY: e.clientY, clientX: e.clientX };
+
+      var self = _this;
 
       if (_this.props.onDragStart) {
-        _this.props.onDragStart(nodeId, dom, e);
+        _this.pressTimer = window.setTimeout(function () {
+          self.props.onDragStart(nodeId, dom, eventXY);
+        }, _this.props.dragDelay);
       }
+    }, _this.handleMouseUp = function (e) {
+      clearTimeout(_this.pressTimer);
     }, _temp), _possibleConstructorReturn(_this, _ret);
   }
 
@@ -120,7 +127,7 @@ var UITreeNode = function (_Component) {
         },
         _react2.default.createElement(
           'div',
-          { className: 'inner', ref: 'inner', onMouseDown: this.handleMouseDown },
+          { className: 'inner', ref: 'inner', onMouseDown: this.handleMouseDown, onMouseUp: this.handleMouseUp },
           this.renderCollapse(),
           tree.renderNode(node)
         ),
