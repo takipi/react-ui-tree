@@ -75,7 +75,8 @@ var UITreeNode = function (_Component) {
               dragging: dragging,
               paddingLeft: _this.props.paddingLeft,
               onCollapse: _this.props.onCollapse,
-              onDragStart: _this.props.onDragStart
+              onDragStart: _this.props.onDragStart,
+              dragDelay: _this.props.dragDelay
             });
           })
         );
