@@ -140,10 +140,16 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.dragStart = function (id, dom, e) {
+
+    var rootIndex = _this2.state.tree.getIndex(1);
+
     if (_this2.props.disableDragging) {
       return;
     }
     if (_this2.props.disableRootDrag && id == 1) {
+      return;
+    }
+    if (_this2.props.dragFirstLevelOnly && !rootIndex.children.includes(id)) {
       return;
     }
 
