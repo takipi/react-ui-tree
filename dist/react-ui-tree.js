@@ -93,7 +93,7 @@ var _initialiseProps = function _initialiseProps() {
   var _this2 = this;
 
   this.init = function (props) {
-    if (_this2.state.dragging && _this2.state.dragging.id) {
+    if (_this2.state && _this2.state.dragging && _this2.state.dragging.id) {
       return;
     }
 
