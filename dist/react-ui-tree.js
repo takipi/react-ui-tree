@@ -150,7 +150,7 @@ var _initialiseProps = function _initialiseProps() {
     if (_this2.props.disableRootDrag && id == 1) {
       return;
     }
-    if (id == 2 && _this2.props.tree.module !== "ROOT") {
+    if (id == 2 && _this2.props.tree.module === "ROOT") {
       return;
     }
 
