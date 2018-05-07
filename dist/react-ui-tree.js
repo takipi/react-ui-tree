@@ -93,6 +93,10 @@ var _initialiseProps = function _initialiseProps() {
   var _this2 = this;
 
   this.init = function (props) {
+    if (_this2.state.dragging && _this2.state.dragging.id) {
+      return;
+    }
+
     var tree = new _tree2.default(props.tree);
     tree.isNodeCollapsed = props.isNodeCollapsed;
     tree.renderNode = props.renderNode;
@@ -140,23 +144,26 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.dragStart = function (id, dom, e) {
+    var rootIndex = _this2.state.tree.getIndex(1);
+
     if (_this2.props.disableDragging) {
       return;
     }
     if (_this2.props.disableRootDrag && id == 1) {
       return;
     }
+    if (id == 2 && _this2.props.tree.module !== "ROOT") {
+      return;
+    }
+    if (_this2.props.tree.module !== "ROOT" && _this2.props.tree.module === "Favorites") {
+      return;
+    }
 
-    _this2.dragging = {
+    _this2.dragData = {
       id: id,
-      w: dom.offsetWidth,
-      h: dom.offsetHeight,
-      x: dom.offsetLeft,
-      y: dom.offsetTop
+      dom: dom
     };
 
-    _this2._startX = dom.offsetLeft;
-    _this2._startY = dom.offsetTop;
     _this2._offsetX = e.clientX;
     _this2._offsetY = e.clientY;
     _this2._start = true;
@@ -167,14 +174,30 @@ var _initialiseProps = function _initialiseProps() {
 
   this.drag = function (e) {
     if (_this2._start) {
+      _this2.dragStarted();
+
+      _this2.dragging = {
+        id: _this2.dragData.id,
+        w: _this2.dragData.dom.offsetWidth,
+        h: _this2.dragData.dom.offsetHeight,
+        x: _this2.dragData.dom.offsetLeft,
+        y: _this2.dragData.dom.offsetTop
+      };
+
+      _this2._startX = _this2.dragData.dom.offsetLeft;
+      _this2._startY = _this2.dragData.dom.offsetTop;
+      _this2._offsetX = e.clientX;
+      _this2._offsetY = e.clientY;
+
       _this2.setState({
         dragging: _this2.dragging
       });
+
       _this2._start = false;
     }
 
     var tree = _this2.state.tree;
-    var dragging = _this2.state.dragging;
+    var dragging = _this2.dragging;
     var paddingLeft = _this2.props.paddingLeft;
     var newIndex = null;
     var index = tree.getIndex(dragging.id);
@@ -208,7 +231,7 @@ var _initialiseProps = function _initialiseProps() {
     }
 
     var diffX = dragging.x - paddingLeft / 2 - (index.left - 2) * paddingLeft;
-    var diffY = dragging.y - dragging.h / 2 - (index.top - 2) * dragging.h;
+    var diffY = tree.obj.module == "ROOT" ? dragging.y - (index.top - 2) * dragging.h : dragging.y - dragging.h / 2 - (index.top - 2) * dragging.h;
 
     if (diffX < 0) {
       // left
@@ -231,14 +254,20 @@ var _initialiseProps = function _initialiseProps() {
       dragging.id = newIndex.id;
     }
 
+    if (_this2.safeCompareNodeId(index, "BDFAVO")) {
+      return;
+    }
+
     if (diffY < 0) {
       // up
       var above = tree.getNodeByTop(index.top - 1);
+      if (_this2.safeCompareNodeId(above, "BDFAVO")) return;
       newIndex = tree.move(index.id, above.id, 'before');
     } else if (diffY > dragging.h) {
       // down
       if (index.next) {
         var below = tree.getIndex(index.next);
+        if (_this2.safeCompareNodeId(below, "BDFAVO")) return;
         if (below.children && below.children.length && !below.node.collapsed) {
           newIndex = tree.move(index.id, index.next, 'prepend');
         } else {
@@ -246,6 +275,7 @@ var _initialiseProps = function _initialiseProps() {
         }
       } else {
         var _below = tree.getNodeByTop(index.top + index.height);
+        if (_this2.safeCompareNodeId(_below, "BDFAVO")) return;
         if (_below && _below.parent !== index.id) {
           if (_below.children && _below.children.length && !_below.node.collapsed) {
             newIndex = tree.move(index.id, _below.id, 'prepend');
@@ -267,7 +297,17 @@ var _initialiseProps = function _initialiseProps() {
     });
   };
 
+  this.safeCompareNodeId = function (index, targetId) {
+    return index && index.node && index.node.id == targetId;
+  };
+
   this.dragEnd = function () {
+    if (_this2.dragging.id == 2 && _this2.state.tree.obj.module == "ROOT") {
+      return;
+    } else if (_this2.state.tree.obj.module !== "Favorites" && _this2.state.tree.obj.module != "ROOT") {
+      return;
+    }
+
     _this2.setState({
       dragging: {
         id: null,
@@ -278,9 +318,21 @@ var _initialiseProps = function _initialiseProps() {
       }
     });
 
+    if (!_this2._start) {
+      _this2.dragEnded(_this2.state.tree);
+    }
+
     _this2.change(_this2.state.tree);
     window.removeEventListener('mousemove', _this2.drag);
     window.removeEventListener('mouseup', _this2.dragEnd);
+  };
+
+  this.dragStarted = function () {
+    if (_this2.props.onDragStarted) _this2.props.onDragStarted();
+  };
+
+  this.dragEnded = function (tree) {
+    if (_this2.props.onDragEnded) _this2.props.onDragEnded(tree.obj);
   };
 
   this.change = function (tree) {
