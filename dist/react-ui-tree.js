@@ -144,8 +144,6 @@ var _initialiseProps = function _initialiseProps() {
   };
 
   this.dragStart = function (id, dom, e) {
-    var rootIndex = _this2.state.tree.getIndex(1);
-
     if (_this2.props.disableDragging) {
       return;
     }
@@ -155,7 +153,9 @@ var _initialiseProps = function _initialiseProps() {
     if (id == 2 && _this2.props.tree.module !== "ROOT") {
       return;
     }
-    if (_this2.props.tree.module !== "ROOT" && _this2.props.tree.module === "Favorites") {
+
+    // exit from presets tree if its not favorites module
+    if (_this2.props.tree.module !== "ROOT" && _this2.props.tree.module !== "Favorites") {
       return;
     }
 
