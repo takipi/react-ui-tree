@@ -143,6 +143,58 @@ var _initialiseProps = function _initialiseProps() {
     return null;
   };
 
+  this.findAncestor = function (el, cls) {
+    while ((el = el.parentElement) && !el.classList.contains(cls)) {}
+    return el;
+  };
+
+  this.getBaseItemHeight = function () {
+    var childrenArr = Array.from(_this2.childrenRoot.children);
+    var heightArray = childrenArr.filter(function (x) {
+      return x.clientHeight && x.clientHeight > 0;
+    }).map(function (x) {
+      return x.clientHeight;
+    });
+    var baseHeight = Math.min.apply(null, heightArray);
+
+    return baseHeight;
+  };
+
+  this.getPrevElementHeight = function (el) {
+    var childrenArr = Array.from(_this2.childrenRoot.children);
+
+    var curIndex = childrenArr.indexOf(el.parentNode);
+
+    var placeholder = childrenArr.find(function (x) {
+      return x.classList.contains("placeholder");
+    });
+
+    if (placeholder) {
+      curIndex = childrenArr.indexOf(placeholder);
+    }
+
+    if (curIndex != -1 && curIndex > 0) return childrenArr[curIndex - 1];
+
+    return 0;
+  };
+
+  this.getNextElementHeight = function (el) {
+    var childrenArr = Array.from(_this2.childrenRoot.children);
+    var curIndex = childrenArr.indexOf(el.parentNode);
+
+    var placeholder = childrenArr.find(function (x) {
+      return x.classList.contains("placeholder");
+    });
+
+    if (placeholder) {
+      curIndex = childrenArr.indexOf(placeholder);
+    }
+
+    if (curIndex != -1 && curIndex < childrenArr.length - 1) return childrenArr[curIndex + 1];
+
+    return 0;
+  };
+
   this.dragStart = function (id, dom, e) {
     if (_this2.props.disableDragging) {
       return;
@@ -154,16 +206,37 @@ var _initialiseProps = function _initialiseProps() {
       return;
     }
 
+    if (_this2.props.tree && _this2.props.tree.module === "ROOT") {
+      _this2.childrenRoot = _this2.findAncestor(dom, 'children');
+      var regularNodeElSize = _this2.getBaseItemHeight();
+      var domBounding = dom.getBoundingClientRect();
+
+      if (e.clientY - domBounding.top > regularNodeElSize) {
+        console.log('dragging inside expanded node');
+        return;
+      }
+
+      _this2.isRootTree = true;
+    } else {
+      _this2.isRootTree = false;
+    }
+
     // exit from presets tree if its not favorites module
     if (_this2.props.tree.module !== "ROOT" && _this2.props.tree.module !== "Favorites") {
       return;
     }
 
-    _this2.dragData = {
+    _this2.dragging = {
       id: id,
-      dom: dom
+      dom: dom,
+      w: dom.offsetWidth,
+      h: dom.offsetHeight,
+      x: dom.offsetLeft,
+      y: dom.offsetTop
     };
 
+    _this2._startX = dom.offsetLeft;
+    _this2._startY = dom.offsetTop;
     _this2._offsetX = e.clientX;
     _this2._offsetY = e.clientY;
     _this2._start = true;
@@ -175,19 +248,6 @@ var _initialiseProps = function _initialiseProps() {
   this.drag = function (e) {
     if (_this2._start) {
       _this2.dragStarted();
-
-      _this2.dragging = {
-        id: _this2.dragData.id,
-        w: _this2.dragData.dom.offsetWidth,
-        h: _this2.dragData.dom.offsetHeight,
-        x: _this2.dragData.dom.offsetLeft,
-        y: _this2.dragData.dom.offsetTop
-      };
-
-      _this2._startX = _this2.dragData.dom.offsetLeft;
-      _this2._startY = _this2.dragData.dom.offsetTop;
-      _this2._offsetX = e.clientX;
-      _this2._offsetY = e.clientY;
 
       _this2.setState({
         dragging: _this2.dragging
@@ -231,7 +291,24 @@ var _initialiseProps = function _initialiseProps() {
     }
 
     var diffX = dragging.x - paddingLeft / 2 - (index.left - 2) * paddingLeft;
-    var diffY = tree.obj.module == "ROOT" ? dragging.y - (index.top - 2) * dragging.h : dragging.y - dragging.h / 2 - (index.top - 2) * dragging.h;
+    var diffY = 0;
+
+    if (_this2.isRootTree) {
+      var loopindex = 0;
+      var totalHeight = 0;
+      var nextElement = _this2.childrenRoot.children[0];
+
+      while (nextElement.innerText != _this2.dragging.dom.innerText && !nextElement.classList.contains("placeholder")) {
+        totalHeight += nextElement.clientHeight;
+        nextElement = _this2.childrenRoot.children[++loopindex];
+      }
+
+      var diffY2 = dragging.y - (index.top - 2) * dragging.h;
+
+      diffY = dragging.y - totalHeight;
+    } else {
+      diffY = dragging.y - dragging.h / 2 - (index.top - 2) * dragging.h;
+    }
 
     if (diffX < 0) {
       // left
@@ -258,12 +335,15 @@ var _initialiseProps = function _initialiseProps() {
       return;
     }
 
-    if (diffY < 0) {
+    var downCompareHeight = _this2.isRootTree ? _this2.getPrevElementHeight(_this2.dragging.dom) : dragging.h;
+    var upCompareHeight = _this2.isRootTree ? -_this2.getNextElementHeight(_this2.dragging.dom) : 0;
+
+    if (diffY < upCompareHeight) {
       // up
       var above = tree.getNodeByTop(index.top - 1);
       if (_this2.safeCompareNodeId(above, "BDFAVO")) return;
       newIndex = tree.move(index.id, above.id, 'before');
-    } else if (diffY > dragging.h) {
+    } else if (diffY > downCompareHeight) {
       // down
       if (index.next) {
         var below = tree.getIndex(index.next);
