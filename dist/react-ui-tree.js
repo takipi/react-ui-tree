@@ -173,7 +173,7 @@ var _initialiseProps = function _initialiseProps() {
       curIndex = childrenArr.indexOf(placeholder);
     }
 
-    if (curIndex != -1 && curIndex > 0) return childrenArr[curIndex - 1];
+    if (curIndex != -1 && curIndex > 0) return childrenArr[curIndex - 1].clientHeight;
 
     return 0;
   };
@@ -190,7 +190,7 @@ var _initialiseProps = function _initialiseProps() {
       curIndex = childrenArr.indexOf(placeholder);
     }
 
-    if (curIndex != -1 && curIndex < childrenArr.length - 1) return childrenArr[curIndex + 1];
+    if (curIndex != -1 && curIndex < childrenArr.length - 1) return childrenArr[curIndex + 1].clientHeight;
 
     return 0;
   };
