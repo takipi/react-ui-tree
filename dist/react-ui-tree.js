@@ -335,8 +335,8 @@ var _initialiseProps = function _initialiseProps() {
       return;
     }
 
-    var downCompareHeight = _this2.isRootTree ? _this2.getPrevElementHeight(_this2.dragging.dom) : dragging.h;
-    var upCompareHeight = _this2.isRootTree ? -_this2.getNextElementHeight(_this2.dragging.dom) : 0;
+    var upCompareHeight = _this2.isRootTree ? -_this2.getPrevElementHeight(_this2.dragging.dom) : 0;
+    var downCompareHeight = _this2.isRootTree ? _this2.getNextElementHeight(_this2.dragging.dom) : dragging.h;
 
     if (diffY < upCompareHeight) {
       // up
