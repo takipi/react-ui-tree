@@ -126,7 +126,8 @@ var _initialiseProps = function _initialiseProps() {
       var draggingStyles = {
         top: dragging.y,
         left: dragging.x,
-        width: dragging.w
+        width: dragging.w,
+        zIndex: 1
       };
 
       return _react2.default.createElement(
