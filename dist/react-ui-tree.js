@@ -209,11 +209,13 @@ var _initialiseProps = function _initialiseProps() {
 
     if (_this2.props.tree && _this2.props.tree.module === "ROOT") {
       _this2.childrenRoot = _this2.findAncestor(dom, 'children');
+      if (!_this2.childrenRoot) {
+        return;
+      }
       var regularNodeElSize = _this2.getBaseItemHeight();
       var domBounding = dom.getBoundingClientRect();
 
       if (e.clientY - domBounding.top > regularNodeElSize) {
-        console.log('dragging inside expanded node');
         return;
       }
 
