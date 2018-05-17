@@ -269,7 +269,7 @@ var _initialiseProps = function _initialiseProps() {
 
     var tempCollapsed = void 0;
 
-    if (index == null) {
+    if (!index || !index.node) {
       tempCollapsed = false;
       noIndex = true;
     } else {
@@ -321,9 +321,12 @@ var _initialiseProps = function _initialiseProps() {
     } else if (diffX > paddingLeft) {
       // right
       if (index.prev) {
-        var prevNode = tree.getIndex(index.prev).node;
-        if (!prevNode.collapsed && !prevNode.leaf) {
-          newIndex = tree.move(index.id, index.prev, 'append');
+        var prevIndex = tree.getIndex(index.prev);
+        if (prevIndex) {
+          var prevNode = prevIndex.node;
+          if (!prevNode.collapsed && !prevNode.leaf) {
+            newIndex = tree.move(index.id, index.prev, 'append');
+          }
         }
       }
     }
